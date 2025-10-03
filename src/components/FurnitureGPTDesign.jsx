@@ -84,12 +84,14 @@ const useApp = () => {
   const mockProductsStable = useMemo(() => mockProducts, []);
     
   const initialMessages = useMemo(() => [
-    { id: 1, sender: 'agent', text: '¡Hola! Soy tu asistente de diseño. ¿En qué puedo ayudarte hoy? Escribe "catálogo" para ver nuestros productos.', products: null, audio: { isEnabled: false } },
+    { id: 1, sender: 'agent', text: '¡Hola! Soy tu asistente de diseño. ¿En qué puedo ayudarte hoy? Escribe "catálogo" para ver nuestros productos o "quiero comprar [nombre del producto]" para realizar una compra directa.', products: null, audio: { isEnabled: false } },
   ], []);
 
   const [messages, setMessages] = useState(initialMessages);
   const [loading, setLoading] = useState(false);
   const [audioState, setAudioState] = useState({ isEnabled: true, isSpeaking: false, volume: 1 });
+  const [showPurchaseForm, setShowPurchaseForm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const sendMessage = useCallback(async (text) => {
     const userMessage = { id: nextMessageId++, sender: 'user', text, products: null };
@@ -111,9 +113,32 @@ const useApp = () => {
         }, 1000);
     }
 
-
-    if (textLower.includes('hola')) {
-        agentResponseText = "¡Hola! ¿Cómo estás? Dime qué producto te interesa o si buscas algo en particular.";
+    // Detectar intención de compra
+    if (textLower.includes('quiero comprar') || textLower.includes('comprar')) {
+        // Buscar qué producto quiere comprar
+        const productToFind = textLower.replace('quiero comprar', '').replace('comprar', '').trim();
+        
+        // Buscar el producto en el catálogo
+        const foundProduct = mockProductsStable.find(p => 
+            p.nombre.toLowerCase().includes(productToFind) || 
+            productToFind.includes(p.nombre.toLowerCase())
+        );
+        
+        if (foundProduct) {
+            agentResponseText = `¡Excelente elección! Has seleccionado ${foundProduct.nombre}. Abriendo el formulario de compra...`;
+            agentProducts = [foundProduct];
+            
+            // Mostrar el formulario de compra
+            setSelectedProduct(foundProduct);
+            setTimeout(() => {
+                setShowPurchaseForm(true);
+            }, 1000);
+        } else {
+            agentResponseText = "Lo siento, no he podido encontrar ese producto específico. ¿Quieres ver nuestro catálogo completo?";
+            agentProducts = mockProductsStable;
+        }
+    } else if (textLower.includes('hola')) {
+        agentResponseText = "¡Hola! ¿Cómo estás? Dime qué producto te interesa o si buscas algo en particular. Puedes escribir 'quiero comprar [nombre del producto]' para realizar una compra directa.";
         agentProducts = null;
     } else if (textLower.includes('modular')) {
         agentResponseText = "¡Excelente elección! Aquí tienes el Sillón Modular Lusso:";
@@ -144,7 +169,10 @@ const useApp = () => {
         toggleAudio: () => setAudioState(prev => ({ ...prev, isEnabled: !prev.isEnabled })),
         stopSpeaking: () => setAudioState(prev => ({ ...prev, isSpeaking: false })),
         changeVolume: (v) => setAudioState(prev => ({ ...prev, volume: v }))
-    }
+    },
+    showPurchaseForm,
+    setShowPurchaseForm,
+    selectedProduct
   };
 };
 
@@ -159,9 +187,6 @@ const ProductCard = ({ product }) => {
   // Calculamos el precio final y lo redondeamos a 2 decimales
   const finalPrice = (basePrice * (1 - discount / 100)).toFixed(2);
   const basePriceFormatted = basePrice.toFixed(2);
-  
-  // Estado para mostrar/ocultar el formulario de compra
-  const [showPurchaseForm, setShowPurchaseForm] = useState(false);
   
   // URL de imagen por defecto si no hay imagen
   const defaultImageUrl = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=48&h=48";
@@ -213,73 +238,10 @@ const ProductCard = ({ product }) => {
         </div>
         
         {/* Botón de acción */}
-        <div 
-          className="product-card-action" 
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setShowPurchaseForm(true);
-          }}
-          style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-        >
+        <div className="product-card-action">
           <ShoppingBag className="w-4 h-4" />
         </div>
       </div>
-      
-      {/* Formulario de compra */}
-       {showPurchaseForm && (
-         <div 
-           className="purchase-form-overlay"
-           onClick={(e) => {
-             // Solo cerrar si se hace clic en el overlay, no en el formulario
-             if (e.target.className === 'purchase-form-overlay') {
-               setShowPurchaseForm(false);
-             }
-           }}
-         >
-           <div className="purchase-form-container" onClick={(e) => e.stopPropagation()}>
-             <h3>Comprar {product.nombre}</h3>
-             <form className="purchase-form">
-               <input type="text" placeholder="Nombre completo" required />
-               <input type="email" placeholder="Email" required />
-               <input type="tel" placeholder="Teléfono" required />
-               <input type="text" placeholder="Dirección de envío" required />
-               
-               {/* Campos de tarjeta de crédito */}
-               <div className="card-section">
-                 <h4>Información de pago</h4>
-                 <input type="text" placeholder="Número de tarjeta" required />
-                 <div className="card-details">
-                   <input type="text" placeholder="MM/AA" required />
-                   <input type="text" placeholder="CVV" required />
-                 </div>
-                 <input type="text" placeholder="Nombre en la tarjeta" required />
-               </div>
-               
-               <div className="form-actions">
-                 <button 
-                   type="button" 
-                   onClick={() => setShowPurchaseForm(false)}
-                   className="cancel-button"
-                 >
-                   Cancelar
-                 </button>
-                 <button 
-                   type="submit" 
-                   onClick={(e) => {
-                     e.preventDefault();
-                     alert(`¡Gracias por tu compra de ${product.nombre}!`);
-                     setShowPurchaseForm(false);
-                   }}
-                   className="confirm-button"
-                 >
-                   Confirmar Compra
-                 </button>
-               </div>
-             </form>
-           </div>
-         </div>
-       )}
     </div>
   );
 };
@@ -367,8 +329,11 @@ const ChatMessage = ({ message, mood, isTyping, isThinking }) => {
 // 3. COMPONENTE PRINCIPAL (FurnitureGPTDesign)
 // ===============================================
 
+// Importamos el componente PurchaseForm
+import PurchaseForm from './PurchaseForm';
+
 export default function FurnitureGPTDesign() {
-  const { messages, loading, sendMessage, audio } = useApp();
+  const { messages, loading, sendMessage, audio, showPurchaseForm, setShowPurchaseForm, selectedProduct } = useApp();
   
   const [inputMessage, setInputMessage] = useState('');
   const chatContainerRef = useRef(null);
@@ -392,6 +357,17 @@ export default function FurnitureGPTDesign() {
     }
   };
 
+  const handlePurchaseSubmit = (formData) => {
+    // Aquí se procesaría la compra
+    console.log('Compra realizada:', formData);
+    setShowPurchaseForm(false);
+    handleSendMessage(`Gracias por tu compra de ${selectedProduct.nombre}. Tu pedido ha sido procesado correctamente.`);
+  };
+
+  const handleClosePurchaseForm = () => {
+    setShowPurchaseForm(false);
+  };
+
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -400,6 +376,13 @@ export default function FurnitureGPTDesign() {
 
   return (
     <div className="furniture-gpt-container">
+      {showPurchaseForm && selectedProduct && (
+        <PurchaseForm 
+          product={selectedProduct} 
+          onClose={handleClosePurchaseForm} 
+          onSubmit={handlePurchaseSubmit} 
+        />
+      )}
       <div className="container">
         <header className="header">
           <h1 className="title">ServicioAgente - Consulta con IA</h1>
