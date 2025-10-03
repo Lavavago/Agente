@@ -1,0 +1,250 @@
+/* =============================================== */ 
+/* 1. ANULACIÓN CRÍTICA PARA EL CATÁLOGO (ANCHO COMPLETO) */ 
+/* Objetivo: Forzar que la burbuja del agente ocupe 100% del contenedor */ 
+/* =============================================== */ 
+ 
+/* Selector de máxima especificidad para anular la restricción max-width de la burbuja normal */ 
+/* Asegúrate de que tu componente React usa la clase 'message-agent-products' */ 
+.message.agent-message .message-content.message-agent-products { 
+  /* La anulación CLAVE */ 
+  max-width: 100% !important; 
+  width: 100% !important; 
+  
+  /* Hacemos la burbuja "invisible" para que solo se vea el ProductsGrid */ 
+  background-color: transparent !important; 
+  border: none !important; 
+  box-shadow: none !important; 
+  border-radius: 0 !important; 
+  padding: 0 !important; /* Es crucial eliminar el padding para el 100% */ 
+  margin: 0 !important; 
+} 
+
+/* Forzar la visualización en dos columnas */
+.grid.grid-cols-2 {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  width: 100% !important;
+}
+ 
+/* =============================================== */ 
+/* 2. ESTILOS DE LA CUADRÍCULA Y TARJETA DE PRODUCTO */ 
+/* =============================================== */ 
+ 
+/* Estilo de la tarjeta individual (ProductCard) */ 
+.product-card { 
+  display: flex; 
+  flex-direction: column; 
+  background-color: white; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+  position: relative; 
+  width: 100%; 
+  max-width: 95%; 
+  margin: 0 auto; 
+  margin-bottom: 12px; 
+  transition: transform 0.2s ease, box-shadow 0.2s ease; 
+  height: 100%; 
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+} 
+ 
+/* Contenedor de imagen */ 
+.product-card-image { 
+  width: 100%; 
+  height: 90px; /* Altura fija para la imagen */ 
+  object-fit: cover; 
+  background-color: #f0f0f0; 
+} 
+ 
+/* Contenido de la tarjeta (texto y precios) */ 
+.product-card-content { 
+  padding: 8px; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start; 
+} 
+ 
+.product-card-name { 
+  font-size: 13px; 
+  font-weight: 600; 
+  color: #333; 
+  margin-bottom: 4px; 
+  line-height: 1.2; 
+} 
+ 
+/* Contenedor de precios */ 
+.product-card-price-group { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start; 
+  margin-top: 4px; 
+} 
+ 
+/* Precio actual */ 
+.product-card-price { 
+  font-size: 16px; 
+  font-weight: 700; 
+  color: #1f2937; 
+} 
+ 
+/* Precio anterior (tachado) */ 
+.product-card-old-price { 
+  font-size: 11px; 
+  color: #9ca3af; 
+  text-decoration: line-through; 
+  margin-top: 2px; 
+} 
+ 
+/* Botón de acción (El ícono del carrito/email) */ 
+.product-card-action { 
+  position: absolute; 
+  top: 8px; 
+  right: 8px; 
+  background-color: #4f46e5; /* Índigo */ 
+  color: white; 
+  border-radius: 50%; 
+  padding: 5px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+  z-index: 50; 
+} 
+
+/* Estilos para el formulario de compra */
+.purchase-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.purchase-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+}
+
+.purchase-form-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.purchase-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.purchase-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.card-section {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.card-section h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.card-details {
+  display: flex;
+  gap: 10px;
+}
+
+.card-details input {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-button:hover {
+  background-color: #e5e7eb;
+}
+
+.confirm-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+}
+
+.confirm-button:hover {
+  background-color: #4338ca;
+}
+ 
+/* Etiqueta de DISPONIBLE/AGOTADO */ 
+.product-card-tag { 
+  position: absolute; 
+  top: 8px; 
+  left: 0; 
+  font-size: 10px; 
+  font-weight: 700; 
+  color: white; 
+  padding: 2px 6px; 
+  border-top-right-radius: 4px; 
+  border-bottom-right-radius: 4px; 
+  z-index: 10; 
+} 
+ 
+.tag-available { 
+  background-color: #10b981; /* Verde esmeralda */ 
+} 
+ 
+.tag-sold-out { 
+  background-color: #ef4444; /* Rojo */ 
+} 
+ 
+/* Etiqueta de descuento */ 
+.product-card-discount { 
+  font-size: 11px; 
+  font-weight: 700; 
+  color: #ef4444; /* Rojo */ 
+  margin-left: 5px; /* Para separarlo del precio */ 
+}
